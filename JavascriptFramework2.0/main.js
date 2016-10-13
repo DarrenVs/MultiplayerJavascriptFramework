@@ -166,7 +166,7 @@ window.addEventListener("load", function () {
     
     
     
-    LoadWorld(Game.PingPong = new Stage(), Enum.worlds.PingPong);
+    LoadWorld(Game.TankArena = new Stage(), Enum.worlds.TankArena);
     
 })
 
