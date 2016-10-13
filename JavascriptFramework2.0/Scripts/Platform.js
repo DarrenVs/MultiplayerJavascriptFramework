@@ -4,8 +4,7 @@ Enum.classType.Platform = Platform;
 function Platform(properties) {
     var self = this;
     
-    GameObject(self, properties, Enum.classType.Platform);
-    this.classType = Enum.classType.Platform;
+    GameObject(self, properties, "Platform");
     
     this.extends = {
         physics: Physics(this),
@@ -19,6 +18,11 @@ function Platform(properties) {
     
     var xPos = self.position.x;
     
+    
+    self.start["test"] = () => {
+        
+        //if (self.sender == clientID)
+    }
     
     self.update[ "movement" ] = () => {
         
@@ -36,7 +40,7 @@ function Platform(properties) {
     
     self.collisionEnter[ "ReplicateBounce" ] = ( collisionInfo ) => {
         
-        if (self.controller == clientID && collisionInfo.canCollide && collisionInfo.Object.classType == Enum.classType.Ball) {
+        if (self.controller == clientID && collisionInfo.canCollide && collisionInfo.Object.classType == "Ball") {
             
             
             if (collisionInfo.Object.extends.velocity)

@@ -7,6 +7,14 @@ function Player( Socket ) {
 	self.class = "Player";
 	
 	
+	self.updatePlayer = () => {
+		
+		if (self.Socket) {
+			
+			self.Socket.emit("IDrequest_to_client", {ID:self.ID, room:(self.CurrentRoom ? self.CurrentRoom.name : undefined)});
+		}
+	}
+	
 	self.__defineGetter__( 'Socket', () => {return self._Socket;} )
 	self.__defineSetter__( 'Socket', (val) => {
 		
@@ -32,28 +40,41 @@ function Player( Socket ) {
 					
 					for (var objectID in data) {
 						
-						self.CurrentRoom.setObject( objectID, data[ objectID ] );
+						self.CurrentRoom.setObject( self, ( objectID.indexOf(':') > 0 ? objectID : self.ID + ":" + objectID), data[ objectID ] );
 					}
 				} else console.log('something went wrong1: ' + data, self.CurrentRoom)
 			})
 			
 			self.Socket.on('IDrequest_from_client', () => {
 				
-				self.Socket.emit("IDrequest_to_client", {ID:self.ID, room:self.CurrentRoom.name});
+				self.updatePlayer();
 			});
-			self.Socket.emit("IDrequest_to_client", self.ID);
+			self.updatePlayer();
 			
-			if (self.CurrentRoom) {
-				self.CurrentRoom.broadcastPlayerlist();
-				self.Socket.emit("IDrequest_to_client", {ID:self.ID, room:self.CurrentRoom.name});
-			}
+			if (self.Socket && self.CurrentRoom)
+				self.Socket.join(self.CurrentRoom.name);
 		}
 	})
+	self.__defineGetter__( 'CurrentRoom', () => {return self._CurrentRoom;} )
+	self.__defineSetter__( 'CurrentRoom', (val) => {
+		
+		if (self.Socket && self.CurrentRoom)
+			self.Socket.leave(self.CurrentRoom.name)
+		
+		self._CurrentRoom = val;
+		
+		if (self.Socket && self.CurrentRoom)
+			self.Socket.join(self.CurrentRoom.name);
+		
+		self.updatePlayer();
+	} );
 	
 	self.ID = playerCount++;
 	self.Socket = Socket;
 	self.CurrentRoom = undefined;
 	self.lifetime = defaultValues.lifetime;
+	
+	self.PersonalObjects = {};
 }
 
 

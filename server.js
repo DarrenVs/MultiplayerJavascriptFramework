@@ -1,9 +1,11 @@
 //--		Index	   --\\
+
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var Instance = require("./Instance");
+
 // Send index.html
 app.use(express.static(__dirname + '/JavascriptFramework2.0'));
 app.get('/', function (req, res) {
@@ -31,7 +33,9 @@ function GetRooms( SortOptions ) {
 
 function newRoom() {
 	var Room = Instance.new("Room");
+	
 	Rooms[ Room.name ] = Room;
+	
 	return Room;
 }
 
@@ -41,6 +45,7 @@ function quickJoinRoom( Player ) {
 	
 	//Try to join any room starting from index 0;
 	for (var roomIndex in GetRooms()) {
+		console.log(Object.keys(Rooms[ roomIndex ].players).length);
 		if (Rooms[roomIndex].addPlayer( Player ))
 			break;
 	}

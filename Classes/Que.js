@@ -17,21 +17,22 @@ function Que() {
 	
 	var ID = quesCounter++;
 	
-	self.data = {}
+	var data = {};
 	var sendTime = 0;
+	self.cooldown = defaultValues.cooldown;
 	
 	//Add data item
 	self.addQue = (key, value) => {
 		
-		self.data[ key ] = value;
+		data[ key ] = value;
 	}
 	self.deleteQueItem = (key) => {
 		
-		delete self.data[ key ];
+		delete data[ key ];
 	}
 	self.deleteQue = (key) => {
 		
-		self.data = {};
+		data = {};
 	}
 	
 	self.update = () => {
@@ -42,25 +43,25 @@ function Que() {
 		if (time > sendTime) {
 			
 			//Reset timer
-			sendTime = time + defaultValues.sendTime
+			sendTime = time + self.cooldown
 			
 			
 			//Check if the list isn't empty
-			if (Object.keys(self.data).length > 0) {
+			if (Object.keys(data).length > 0) {
 				
 				
 				//Fire events
 				for (var index in listeners)
-					listeners[index]( self.data )
+					listeners[index]( data )
 				
 				//Make a new data object incase the listeners are using the old data object
-				self.data = {};
+				data = {};
 			}
 		}
 	}
 	
 	
-	listeners = {};
+	var listeners = {};
 	self.addListener = ( name, funct ) => {
 		
 		if (name != undefined && typeof(funct) == "function")
@@ -80,7 +81,7 @@ function Que() {
 		delete ques[ ID ];
 	}
 	self.start = () => {
-		sendTime = new Date().getTime() + defaultValues.sendTime
+		sendTime = new Date().getTime() + self.cooldown
 		ques[ ID ] = self;
 	}
 }
@@ -88,7 +89,7 @@ function Que() {
 
 //Values
 var defaultValues = {
-	sendTime: 100,
+	cooldown: 16,
 }
 
 

@@ -12,24 +12,42 @@ socketio.on("updatePlayerlist", (data) => {
 });
 socketio.on("broadcastWorkspace", (data) => {
 	
+    if (clientID >= 0) {
+        for (var objectID in data) {
+
+            var Object = data[ objectID ];
+
+            if (Object.sender != clientID && Object.stageName != undefined && Game[ Object.stageName ]) {
+
+                if (Object.creator == clientID)
+                    Object.ID = Object.ID.substring(Object.ID.indexOf(":")+1);
+                
+                if (!activeObjects[ Object.ID ]) {
+                    if (Enum.classType[ Object.classType ] == undefined || Game[ Object.stageName ] == undefined)
+                        continue;//console.error("cannot make this object, classType is undefined. " + Object.classType);
+
+                    console.log("Making a new " + Object.classType);
+                    var newObject = new Enum.classType[ Object.classType ]();//.parent = Game[ Object.stageName ];
+                    newObject.ID = Object.ID;
+                    newObject.parent = Game[ Object.stageName ];
+                }
+
+                for (var propertyName in Object) {
+
+                    if (allowedProperties[ propertyName ] == true)
+                        activeObjects[ Object.ID ][ propertyName ] = Object[ propertyName ];
+
+                }
+            }
+        }
+    }
+});
+socketio.on("broadcastWorkspace_RemoveObject", (data) => {
+	
 	for (var objectID in data) {
 		
-		if (Game.PingPong && data[ objectID ].sender != clientID) {
-			if (!Game.PingPong.childs[ objectID ]) {
-				if ([data.classType] == undefined)
-					console.error("cannot make this object, classType is undefined. " + data.classType);
-				
-				console.log("Making a new " + data.classType);
-				[data.classType]().parent = Game.PingPong;
-			}
-			
-			for (var propertyName in data[ objectID ]) {
-				
-				if (allowedProperties[ propertyName ] == true)
-					Game.PingPong.childs[ objectID ][ propertyName ] = data[ objectID ][ propertyName ];
-				
-			}
-		}
+		if (activeObjects[ objectID ])
+            activeObjects[ objectID ].destroy();
 	}
 });
 allowedProperties = {
@@ -40,6 +58,9 @@ allowedProperties = {
 	scale: true,
 	controller: true,
 	sender: true,
+    classType: true,
+    stageName: true,
+    hitbox: true,
 }
 
 //Request the ID
@@ -63,10 +84,15 @@ window.setInterval(() => {
 function PackageObject( Obj ) {
 	
 	var package = {}
-	for (propertyName in allowedProperties) {
-		
-		package[ propertyName ] = Obj[ propertyName ];
-	}
+    
+    if (Obj.stage) {
+        
+        for (propertyName in allowedProperties) {
+
+            package[ propertyName ] = Obj[ propertyName ];
+        }
+        package.stageName = Obj.stage.name
+    }
 	
 	
 	return package;

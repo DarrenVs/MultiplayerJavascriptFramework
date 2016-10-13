@@ -4,8 +4,7 @@ Enum.classType.Ball = Ball;
 function Ball(properties) {
     var self = this;
     
-    GameObject(self, properties, Enum.classType.Ball);
-    this.classType = Enum.classType.Ball;
+    GameObject(self, properties, "Ball");
     
     this.extends = {
         physics: Physics(this),

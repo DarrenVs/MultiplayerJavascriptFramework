@@ -298,6 +298,16 @@ function Stage(properties) {
             return Grids;
         },
     }
+    
+    
+    self.destroy = function() {
+        
+        if (Object.parent)
+            delete Object.parent.childs[ Object.ID ];
+        delete activeObjects[ Object.ID ];
+        Object.Parent = undefined;
+        delete Game[ self.name ];
+    }
 }
 
 function updateStage(Obj) {
@@ -359,16 +369,44 @@ function GameObject(Object, properties, classType) {
     
     Object.__defineGetter__('parent', () => {
         
-        return Object.Parent;
+        return Object._Parent;
     })
     Object.__defineSetter__('parent', (val) => {
         
         if (val) {
 
-            Object.Parent = val;
+            Object._Parent = val;
             val.childs[ Object.ID ] = Object;
             updateStage( Object );
         }
+    })
+    Object.__defineGetter__('stage', () => {
+        
+        return Object._Stage;
+    })
+    Object.__defineSetter__('stage', (val) => {
+        
+        if (val && val != Object._Stage) {
+
+            Object._Stage = val;
+            for (var i in Object.start) {
+                if (typeof(Object.start[i]) == "function")
+                    Object.start[i]();
+            }
+        }
+    })
+    Object.__defineGetter__('ID', () => {
+        
+        return Object._ID;
+    })
+    Object.__defineSetter__('ID', (val) => {
+        
+        if (activeObjects[ Object._ID ])
+            delete activeObjects[ Object._ID ];
+        
+        Object._ID = val;
+        
+        activeObjects[ Object._ID ] = Object
     })
     
 
@@ -376,10 +414,11 @@ function GameObject(Object, properties, classType) {
 
     
     //Property Index\\
+    Object.name = "UnamedObject";
     Object.parent = undefined;
     Object.stage = undefined;
     Object.zIndex = 0;
-    Object.classType = classType || Enum.classType.Unknown;
+    Object.classType = classType;
     Object.update = {};
     Object.extends = {};
     Object.childs = {};
@@ -391,7 +430,6 @@ function GameObject(Object, properties, classType) {
     for (var i in properties) Object[i] = properties[i];
     
     
-    activeObjects[ Object.ID ] = Object
     
     
     //Methods\\
@@ -405,6 +443,8 @@ function GameObject(Object, properties, classType) {
         ObjectPool[ Object.ID ] = Object;
         ObjectPool.count++;*/
     }
+    
+    Object.start = {} //should be filled with functions that should be run once this object enters a stage
 }
 
 

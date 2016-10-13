@@ -4,8 +4,7 @@ Enum.classType.Wall = Wall;
 function Wall(properties) {
     var self = this;
     
-    GameObject(self, properties, Enum.classType.Ball);
-    this.classType = Enum.classType.Ball;
+    GameObject(self, properties, "Wall");
     
     this.extends = {
         collision: Collision(this),

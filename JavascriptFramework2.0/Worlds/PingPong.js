@@ -10,6 +10,8 @@ function PingPong( stage ) {
     stage.gravityType = Enum.gravity.global;
     stage.gravity = Vector2.new(0,0);
     
+    stage.name = "PingPong";
+    
     
     //TODO
     stage.gameState = {
@@ -65,14 +67,14 @@ function PingPong( stage ) {
         size: Vector2.new(20, platformHeight),
     })
     leftPlatform.parent = stage;
-    var rightPlatform = new Platform({
+    /*var rightPlatform = new Platform({
         position: Vector2.new(ArenaResolution.x - wallWidth, ArenaResolution.y/2),
         size: Vector2.new(20, platformHeight),
     })
-    rightPlatform.parent = stage;
+    rightPlatform.parent = stage;*/
     
     new Ball({position: Vector2.new(ArenaResolution.x/2, ArenaResolution.y/2),size:Vector2.new(20,20)}).parent = stage;
-    new Ball({position: Vector2.new(ArenaResolution.x/2, ArenaResolution.y/2),size:Vector2.new(20,20)}).parent = stage;
+    //new Ball({position: Vector2.new(ArenaResolution.x/2, ArenaResolution.y/2),size:Vector2.new(20,20)});
     
     
     var debugText = new EmptyObject({
@@ -82,8 +84,12 @@ function PingPong( stage ) {
     
     self.update[ "gameManager" ] = () => {
         
-        leftPlatform.controller = Object.keys(Playerlist)[0];
-        rightPlatform.controller = Object.keys(Playerlist)[1];
+        leftPlatform.controller = clientID;//Object.keys(Playerlist)[0];
+        if (Object.keys(Playerlist)[0] == clientID)
+            leftPlatform.position.x = ArenaResolution.x - wallWidth;
+        else
+            leftPlatform.position.x = wallWidth;
+        //rightPlatform.controller = Object.keys(Playerlist)[1];
         
         debugText.text = "Connected playerID's: " + Object.keys(Playerlist) + "      Current room: " + room;
     }

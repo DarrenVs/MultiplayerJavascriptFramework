@@ -6,8 +6,7 @@ function Goal(properties) {
     
     
     
-    GameObject(self, properties, Enum.classType.Ball);
-    this.classType = Enum.classType.Ball;
+    GameObject(self, properties, "Goal");
     
     this.extends = {
         collision: Collision(this),
@@ -18,7 +17,7 @@ function Goal(properties) {
     
     self.collisionEnter[ "Goal" ] = function( collisionInfo ) {
         
-        /*if (collisionInfo.Object.classType == Enum.classType.Ball) {
+        /*if (collisionInfo.Object.classType == "Ball") {
             
             self.stage.gameState.Scored();
         }*/

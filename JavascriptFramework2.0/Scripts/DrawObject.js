@@ -14,8 +14,8 @@ function DrawObject(Parent) {
 
         ctx.fillStyle = "black";//self.parent.color;
         ctx.strokeStyle = "black";
-        if (self.parent.colliderType != undefined) {
-            if (self.parent.colliderType == Enum.colliderType.box)
+        //if (self.parent.colliderType != undefined) {
+            if (self.parent.colliderType == undefined || self.parent.colliderType == Enum.colliderType.box)
                 ctx.fillRect(-self.parent.size.x * 0.5, -self.parent.size.y * 0.5, self.parent.size.x, self.parent.size.y);
             else if (self.parent.colliderType == Enum.colliderType.circle) {
                 ctx.beginPath();
@@ -24,7 +24,7 @@ function DrawObject(Parent) {
                 ctx.stroke();
                 ctx.fill();
             }
-        }
+        //}
         
         if (self.parent.text) {
             

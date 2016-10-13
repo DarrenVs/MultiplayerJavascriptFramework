@@ -4,6 +4,7 @@ var roomCount = 0;
 
 
 //	Functons
+
 sendPackage = function( Player, listenerName, data ) {
 	
 	if (Player.Socket == undefined) {
@@ -27,6 +28,9 @@ function Room() {
 		if (typeof(Player) == "object" && Player.class == 'Player') {
 			
 			if (self.playerCount < self.maxPlayers) {
+				
+				ClearPersonalObjects( Player );
+				
 				Player.CurrentRoom = self;
 				Player.lifetime = new Date().getTime() + defaultValues.maxIdle;
 				self.players[ Player.ID ] = Player;
@@ -46,6 +50,9 @@ function Room() {
 		if (typeof(Player) == "object" && Player.class == 'Player') {
 			
 			if (self.players[ Player.ID ]) {
+				
+				ClearPersonalObjects( Player );
+				
 				Player.CurrentRoom = undefined;
 				delete self.players[ Player.ID ];
 				self.playerCount--;
@@ -80,11 +87,6 @@ function Room() {
 	self.maxIdle = defaultValues.maxIdle
 	
 	self.roomReplyTime = defaultValues.roomReplyTime;
-	self.changes = {
-		//[ID]
-	};
-	
-	var worldName = undefined;
 	
 	
 	self.update = () => {
@@ -97,7 +99,7 @@ function Room() {
 	}
 	
 	
-	self.workspaceRules = {
+	var workspaceRules = {
 		readOnly: defaultValues.workspace.ReadOnly,
 		clientsCanSpawnObjects: defaultValues.workspace.clientsCanSpawnObjects,
 	}
@@ -105,17 +107,22 @@ function Room() {
 		//ObjectID: Properties { }
 		//GameObject's here
 	}
+	self.workspace = workspace;
 	
-	self.setObject = ( objectID, properties ) => {
+	self.setObject = ( Player, objectID, properties ) => {
 		
 		//Check if object exists
-		if (!workspace[ objectID ] && self.workspaceRules.clientsCanSpawnObjects) {
+		if (!workspace[ objectID ] && workspaceRules.clientsCanSpawnObjects) {
 			
 			//Create a new one if it doesn't
 			var newObject = Instance.new( "GameObject" );
-			newObject.ID = objectID
+			newObject.classType = properties.classType;
+			newObject.creator = Player.ID;
+			newObject.ID = objectID;
 			workspace[ objectID ] = newObject
-		} else if (!self.workspaceRules.clientsCanSpawnObjects) console.log("cannot spawn objects from client");
+			
+			Player.PersonalObjects[ objectID ] = newObject
+		} else if (!workspaceRules.clientsCanSpawnObjects) console.log("cannot spawn objects from client");
 		
 		//Set the properties
 		for (var propertyName in properties) {
@@ -125,24 +132,42 @@ function Room() {
 				workspace[ objectID ][ propertyName ] = properties[ propertyName ];
 		}
 		
+		
 		Que.addQue( objectID, workspace[ objectID ] );
+	}
+	self.removeObject = ( objectID ) => {
+		
+		if (workspace[ objectID ]) {
+			delete workspace[ objectID ];
+		}
 	}
 	
 	
 	var Que = Instance.new("Que");
 	Que.sendTime = defaultValues.roomReplyTime;
-	Que.addListener( "broadcastWorkspace", (data) => {
+	Que.addListener( "broadcastWorkspace", function(data) {
 		
 		for (playerID in self.players)
 			sendPackage( self.players[ playerID ], "broadcastWorkspace", data );
-	})
+	} )
+}
+
+function ClearPersonalObjects( Player ) {
+	
+	for (var i in Player.PersonalObjects) {
+		
+		if (Player.CurrentRoom)
+			Player.CurrentRoom.removeObject( Player.PersonalObjects[ i ] );
+		else
+			Player.PersonalObjects[ i ].Destroy();
+	}
 }
 
 
 //Values
 var defaultValues = {
 	roomReplyTime: 20, //Miliseconds
-	maxIdle: 5000, //Miliseconds
+	maxIdle: 500000, //Miliseconds
 	maxPlayers: 2, //Max connections
 	reasons: {
 		idle: 'For being idle too long',
@@ -160,6 +185,9 @@ var defaultValues = {
 		class: true,
 		controller: true,
 		sender: true,
+		stageName: true,
+		creator: true,
+		hitbox: true,
 	},
 }
 
