@@ -53,10 +53,8 @@ function Physics(Parent) {
     Parent.__defineSetter__('velocity', function(val) {
         
         if (val != undefined && val.x != undefined && val.y != undefined && val.x != NaN && val.y != NaN) {
-            Parent.Velocity.X = val.x;
-            Parent.Velocity.Y = val.y;
-            
-            addToPhysicsLoop( Parent );
+            Parent.Velocity.x = val.x;
+            Parent.Velocity.y = val.y;
         }
     })
     Parent.__defineGetter__('velocity', () => {
@@ -70,7 +68,8 @@ function Physics(Parent) {
         if (val != undefined && val != NaN) {
             Parent.Velocity.X = val;
             
-            addToPhysicsLoop( Parent );
+            if (val > .2 || val < -.2)
+                addToPhysicsLoop( Parent );
         }
     })
     Parent.Velocity.__defineGetter__('x', () => {
@@ -84,7 +83,8 @@ function Physics(Parent) {
         if (val != undefined && val != NaN) {
             Parent.Velocity.Y = val;
             
-            addToPhysicsLoop( Parent );
+            if (val > .2 || val < -.2)
+                addToPhysicsLoop( Parent );
         }
     })
     Parent.Velocity.__defineGetter__('y', () => {
@@ -95,7 +95,11 @@ function Physics(Parent) {
     
     
     
-    if (!Parent.collisionEnter) Parent.collisionEnter = {};
+    Parent.collisionExit = Parent.collisionExit || {};
+    Parent.collisionExit["PhysicsLoop"] = () => {
+        addToPhysicsLoop( Parent );
+    }
+    Parent.collisionEnter = Parent.collisionEnter || {};
     Parent.collisionEnter["physics"] = function( collisionInfo ) {
         
         if (!Parent.anchored && collisionInfo.canCollide && CheckCollision( Parent, collisionInfo.Object, PHYSICSSETTINGS.deltaTime )) {
